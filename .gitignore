@@ -1,0 +1,7 @@
+# Folder
+__pycache__/
+data/cache/
+data/index_storage/
+
+# Environments
+.env
