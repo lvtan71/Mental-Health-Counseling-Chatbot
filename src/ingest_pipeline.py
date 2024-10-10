@@ -36,7 +36,7 @@ def ingest_documents():
     pipeline = IngestionPipeline(
         transformations=[
             TokenTextSplitter(
-                chunk_size=128,
+                chunk_size=512,
                 chunk_overlap=20
             ),
             # SummaryExtractor(summaries=['self'], prompt_template=CUSTORM_SUMMARY_EXTRACT_TEMPLATE),
