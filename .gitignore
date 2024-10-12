@@ -3,5 +3,8 @@ __pycache__/
 data/cache/
 data/index_storage/
 
+# File
+display.py
+
 # Environments
 .env
