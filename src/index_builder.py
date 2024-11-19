@@ -12,7 +12,7 @@ def build_indexes(nodes):
         )
         print("All indices loaded from storage.")
     except Exception as e:
-        print(f"Error occurred while loading indices: {e}")
+        print("No indexes found in storage. Creating new indexes...")
         storage_context = StorageContext.from_defaults()
         vector_index = VectorStoreIndex(
             nodes, storage_context=storage_context

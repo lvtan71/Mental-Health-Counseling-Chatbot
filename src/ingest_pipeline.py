@@ -1,24 +1,45 @@
 import os
 from dotenv import load_dotenv
 from llama_index.core import SimpleDirectoryReader
+from llama_parse import LlamaParse
 from llama_index.core.ingestion import IngestionCache, IngestionPipeline
 from llama_index.core.node_parser import TokenTextSplitter
 from llama_index.core.extractors import SummaryExtractor
 from llama_index.embeddings.gemini import GeminiEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings
 from llama_index.llms.gemini import Gemini
-from src.global_settings import STORAGE_PATH, CACHE_FILE
-from src.prompts import CUSTORM_SUMMARY_EXTRACT_TEMPLATE
+from src.global_settings import (STORAGE_PATH,
+                                 CACHE_FILE,
+                                 DEFAULT_HUGGINGFACE_EMBEDDING,
+                                 CACHE_MODEL_DIR,
+                                 DEFAULT_GEMINI_MODEL
+                                 )
+import nest_asyncio
+
+nest_asyncio.apply()
 load_dotenv()
 
 api_key = os.environ["GEMINI_API_KEY"]
-Settings.llm = Gemini(model="models/gemini-1.0-pro-001", api_key=api_key)
-Settings.embed_model = GeminiEmbedding(model_name="models/text-embedding-004", api_key=api_key)
+Settings.llm = Gemini(model=DEFAULT_GEMINI_MODEL, api_key=api_key)
+Settings.embed_model = HuggingFaceEmbedding(model_name=DEFAULT_HUGGINGFACE_EMBEDDING,
+                                            cache_folder=os.path.join(os.getcwd(), CACHE_MODEL_DIR),
+                                            )
 
 def ingest_documents():
+
+    parser = LlamaParse(
+        result_type="markdown",
+        verbose=True,
+        language="vi",
+    )
+
+    file_extractor = {".pdf": parser}
+
     documents = SimpleDirectoryReader(
         STORAGE_PATH,
-        filename_as_id=True
+        filename_as_id=True,
+        file_extractor=file_extractor,
     ).load_data()
 
     for doc in documents:
@@ -39,8 +60,7 @@ def ingest_documents():
                 chunk_size=512,
                 chunk_overlap=20
             ),
-            # SummaryExtractor(summaries=['self'], prompt_template=CUSTORM_SUMMARY_EXTRACT_TEMPLATE),
-            GeminiEmbedding(model_name="models/text-embedding-004", api_key=api_key)
+            Settings.embed_model,
         ],
         cache=cached_hashes
     )
