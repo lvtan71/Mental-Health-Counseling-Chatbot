@@ -1,4 +1,5 @@
-from .global_settings import STORAGE_PATH, CACHE_FILE, INDEX_STORAGE
+from .global_settings import STORAGE_PATH, CACHE_FILE, INDEX_STORAGE, DEFAULT_GEMINI_MODEL, DEFAULT_GEMINI_EMBEDDING
 from .ingest_pipeline import ingest_documents
 from .prompts import CUSTORM_SUMMARY_EXTRACT_TEMPLATE, CUSTORM_AGENT_SYSTEM_TEMPLATE, QUESTION_GEN_QUERY_TEMPLATE
 from .generate_dataset import RagDatasetGeneratorWithDelay
+from .gemini import Gemini
