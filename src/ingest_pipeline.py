@@ -13,33 +13,36 @@ from src.global_settings import (STORAGE_PATH,
                                  CACHE_FILE,
                                  DEFAULT_HUGGINGFACE_EMBEDDING,
                                  CACHE_MODEL_DIR,
-                                 DEFAULT_GEMINI_MODEL
+                                 DEFAULT_GEMINI_MODEL,
+                                 DEFAULT_GEMINI_EMBEDDING
                                  )
 import nest_asyncio
 
 nest_asyncio.apply()
 load_dotenv()
 
-api_key = os.environ["GEMINI_API_KEY"]
-Settings.llm = Gemini(model=DEFAULT_GEMINI_MODEL, api_key=api_key)
-Settings.embed_model = HuggingFaceEmbedding(model_name=DEFAULT_HUGGINGFACE_EMBEDDING,
-                                            cache_folder=os.path.join(os.getcwd(), CACHE_MODEL_DIR),
-                                            )
+Settings.llm = Gemini(model=DEFAULT_GEMINI_MODEL)
+Settings.embed_model = GeminiEmbedding(model_name=DEFAULT_GEMINI_EMBEDDING)
 
 def ingest_documents():
 
-    parser = LlamaParse(
-        result_type="markdown",
-        verbose=True,
-        language="vi",
-    )
+    # parser = LlamaParse(
+    #     result_type="markdown",
+    #     verbose=True,
+    #     language="vi",
+    # )
 
-    file_extractor = {".pdf": parser}
+    # file_extractor = {".pdf": parser}
+
+    # documents = SimpleDirectoryReader(
+    #     STORAGE_PATH,
+    #     filename_as_id=True,
+    #     file_extractor=file_extractor,
+    # ).load_data()
 
     documents = SimpleDirectoryReader(
-        STORAGE_PATH,
+        os.path.join(STORAGE_PATH, "temp"),
         filename_as_id=True,
-        file_extractor=file_extractor,
     ).load_data()
 
     for doc in documents:
