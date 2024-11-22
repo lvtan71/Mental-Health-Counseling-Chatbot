@@ -9,3 +9,9 @@ To create cache and index data for future runs.
 ```bash
 python build_data.py
 ```
+
+## Run chatbot
+
+```bash
+streamlit run pages/chat.py
+```
