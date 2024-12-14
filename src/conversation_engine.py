@@ -9,11 +9,14 @@ from llama_index.core import load_index_from_storage, StorageContext, VectorStor
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.tools import QueryEngineTool, FunctionTool, ToolMetadata
 from llama_index.core.agent import ReActAgent
+from llama_index.agent.openai import OpenAIAgent
+from llama_index.llms.openai import OpenAI
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory.types import DEFAULT_CHAT_STORE_KEY
 from llama_index.core import Settings
 from llama_index.core import PromptTemplate
 from src.global_settings import INDEX_STORAGE, CONVERSATION_FILE, SCORES_FILE, PINECONE_INDEX_NAME
+from src.global_settings import DEFAULT_GEMINI_MODEL, DEFAULT_OPENAI_MODEL
 from src.prompts import (CUSTORM_AGENT_SYSTEM_TEMPLATE,
                          QA_PROMPT_TEMPLATE,
                          AGENT_WORKER_PROMPT_TEMPLATE_VI,
@@ -22,8 +25,9 @@ from src.prompts import (CUSTORM_AGENT_SYSTEM_TEMPLATE,
                          )
 from src.gemini import Gemini
 
-query_llm = Gemini(model="models/gemini-1.5-flash-002")
-agent_llm = Gemini(model="models/gemini-1.5-flash-002", system_instruction=CUSTORM_AGENT_SYSTEM_TEMPLATE)
+# query_llm = Gemini(model=DEFAULT_GEMINI_MODEL)
+# gemini_agent_llm = Gemini(model=DEFAULT_GEMINI_MODEL, system_instruction=CUSTORM_AGENT_SYSTEM_TEMPLATE)
+# openai_agent_llm = OpenAI(model=DEFAULT_OPENAI_MODEL)
 
 # Utility functions
 def load_chat_store():
@@ -35,8 +39,16 @@ def load_chat_store():
             return SimpleChatStore()
     return SimpleChatStore()
 
-def save_score(full_advice, score, content):
-    """Saves a mental health score and details to a file."""
+def save_score(full_advice: str, score: int, content: str):
+    """
+    Saves a mental health score and details to a file.
+
+    Args:
+        - full_advice (str): The full advice for the user.
+        - score (int): The mental health score.
+            1: Very poor, 2: Poor, 3: Average, 4: Good, 5: Excellent
+        - content (str): The detailed mental health information. 
+    """
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_entry = {
         "time": current_time,
@@ -84,7 +96,9 @@ def initialize_chatbot(chat_store, container):
     index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
 
     # Initialize the query engine tools
-    mental_health_query_engine = index.as_query_engine(similarity_top_k=3, llm=query_llm)
+    mental_health_query_engine = index.as_query_engine(similarity_top_k=3,
+                                                    #    llm=query_llm
+                                                       )
     mental_health_query_engine.update_prompts({"response_synthesizer:text_qa_template": PromptTemplate(QA_PROMPT_TEMPLATE)})
 
     mental_health_tool = QueryEngineTool(
@@ -99,24 +113,27 @@ def initialize_chatbot(chat_store, container):
     # Initialize the save score tool
     save_score_tool = FunctionTool.from_defaults(
         fn=save_score,
-        tool_metadata=ToolMetadata(
-            name="SaveScore",
-            description=("Lưu điểm số và thông tin sức khỏe tâm thần vào file. Có 2 tham số đầu vào 'full_advice', 'score', 'content'."
-                         "Trong đó: 'full_advice' là toàn bộ lời khuyên cho người dùng (không tóm tắt), 'score' là điểm số sức khỏe tâm thần, 'content' là thông tin chi tiết về sức khỏe tâm thần.")
-        )
+        name="SaveScore",
     )
 
     # Initialize the agent
-    agent = ReActAgent.from_tools(
-        tools=[mental_health_tool, save_score_tool],
-        llm=agent_llm,
-        memory=memory,
-        max_iterations=10,
-        verbose=True,
-        # context=CUSTORM_AGENT_SYSTEM_TEMPLATE
-    )
+    # agent = ReActAgent.from_tools(
+    #     tools=[mental_health_tool, save_score_tool],
+    #     # llm=gemini_agent_llm,
+    #     memory=memory,
+    #     verbose=True,
+    #     # context=CUSTORM_AGENT_SYSTEM_TEMPLATE
+    # )
 
-    agent.update_prompts({"agent_worker:system_prompt": PromptTemplate(AGENT_WORKER_PROMPT_TEMPLATE_EN)})
+    agent = OpenAIAgent.from_tools(
+        tools=[mental_health_tool, save_score_tool],
+        # llm=openai_agent_llm,
+        memory=memory,
+        system_prompt=CUSTORM_AGENT_SYSTEM_TEMPLATE,
+        verbose=True
+    )
+ 
+    # agent.update_prompts({"agent_worker:system_prompt": PromptTemplate(AGENT_WORKER_PROMPT_TEMPLATE_EN)})
 
     # Display chat messages
     display_messages(chat_store, container)

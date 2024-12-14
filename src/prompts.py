@@ -20,11 +20,23 @@ CUSTORM_AGENT_SYSTEM_TEMPLATE = """\
 
 
 QUESTION_GEN_QUERY_TEMPLATE = """\
-Bạn là một Giáo viên/Professor. Nhiệm vụ của bạn là thiết lập {num_questions_per_chunk} câu hỏi cho bài kiểm tra/sát hạch sắp tới.
-Các câu hỏi nên mang tính khái quát, không ám chỉ hoặc liên quan đến bất kỳ ngữ cảnh cụ thể nào.
-1. Các câu hỏi nằm trong phạm vi thông tin ngữ cảnh được cung cấp, phải độc lập, mang tính chung chung, và không chứa các từ như "Theo đoạn văn", "Dựa vào ngữ cảnh", "Dựa vào tài liệu" hoặc các từ mang nghĩa tương tự.
-2. Các câu hỏi đều bằng tiếng Việt.
-3. Các câu hỏi được liệt kê ngăn cách nhau bằng dấu xuống dòng và bắt đầu bằng 'Câu hỏi: '.
+Bạn là một người bệnh. Nhiệm vụ của bạn là liệt kê {num_questions_per_chunk} lời khai độc lập về triệu chứng hoặc tình trạng bệnh dựa trên ngữ cảnh được cung cấp.  
+Mỗi lời khai nên được viết theo phong cách khác nhau, tương tự như cách {num_questions_per_chunk} người khác nhau cùng mô tả các triệu chứng chung nhưng bằng ngôn ngữ và cách diễn đạt riêng biệt.  
+Các câu hỏi/lời khai sẽ được sử dụng để đánh giá hệ thống tư vấn sức khỏe tinh thần, nơi hệ thống nhận vào các thực trạng, triệu chứng, vấn đề của người bệnh và đưa ra chẩn đoán cũng như lời khuyên hợp lý.  
+1. Các lời khai phải nằm trong phạm vi thông tin của ngữ cảnh, nếu có.  
+2. Mỗi lời khai phải độc lập, không lặp lại trực tiếp nội dung của lời khai khác, và được viết bằng tiếng Việt.  
+3. Nếu ngữ cảnh không cung cấp thông tin về bệnh, hãy sinh ra {num_questions_per_chunk} lời khai rỗng (mỗi lời khai rỗng tương ứng với một dòng trống).  
+4. Các lời khai được liệt kê, ngăn cách nhau bằng dấu xuống dòng và bắt đầu bằng 'Lời khai: '.  
+"""
+
+TEXT_QA_TEMPLATE = """\
+Thông tin ngữ cảnh được cung cấp dưới đây.  
+---------------------  
+{context_str}  
+---------------------  
+Dựa trên thông tin ngữ cảnh và không sử dụng kiến thức trước đó, trả lời lời khai dưới đây bằng cách đưa ra chẩn đoán và tư vấn về tình trạng bệnh có trong lời khai.  
+Lời khai: {query_str}  
+Chẩn đoán và tư vấn:\n
 """
 
 

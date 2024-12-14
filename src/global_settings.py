@@ -15,6 +15,8 @@ SCORES_FILE = "data/cache/scores.json"
 # Default HuggingFace embedding model
 DEFAULT_HUGGINGFACE_EMBEDDING = "intfloat/multilingual-e5-large"
 # Default Gemini model
-DEFAULT_GEMINI_MODEL = "models/gemini-1.5-flash-001"
+DEFAULT_GEMINI_MODEL = "models/gemini-1.5-flash-002"
 # Default Gemini embedding model
 DEFAULT_GEMINI_EMBEDDING = "models/text-embedding-004"
+# Default OpenAI model
+DEFAULT_OPENAI_MODEL = "gpt-4o-mini"

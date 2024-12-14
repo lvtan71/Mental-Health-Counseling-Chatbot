@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from llama_index.core import SimpleDirectoryReader
 from llama_parse import LlamaParse
 from llama_index.core.ingestion import IngestionCache, IngestionPipeline
-from llama_index.core.node_parser import TokenTextSplitter
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.extractors import SummaryExtractor
 from llama_index.embeddings.gemini import GeminiEmbedding
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
@@ -21,7 +21,6 @@ import nest_asyncio
 nest_asyncio.apply()
 load_dotenv()
 
-Settings.llm = Gemini(model=DEFAULT_GEMINI_MODEL)
 Settings.embed_model = GeminiEmbedding(model_name=DEFAULT_GEMINI_EMBEDDING)
 
 def ingest_documents():
@@ -59,7 +58,8 @@ def ingest_documents():
 
     pipeline = IngestionPipeline(
         transformations=[
-            TokenTextSplitter(
+            SentenceSplitter(
+                separator="\n",
                 chunk_size=512,
                 chunk_overlap=20
             ),
