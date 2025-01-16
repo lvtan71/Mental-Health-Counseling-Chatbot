@@ -12,6 +12,8 @@ CONVERSATION_FILE = "data/cache/chat_history.json"
 PINECONE_INDEX_NAME = "mental-health"
 # Cache file for the scores
 SCORES_FILE = "data/cache/scores.json"
+# Cache file for the summary
+SUMMARY_FILE = "data/cache/summary.txt"
 # Default HuggingFace embedding model
 DEFAULT_HUGGINGFACE_EMBEDDING = "intfloat/multilingual-e5-large"
 # Default Gemini model
@@ -20,3 +22,5 @@ DEFAULT_GEMINI_MODEL = "models/gemini-1.5-flash-002"
 DEFAULT_GEMINI_EMBEDDING = "models/text-embedding-004"
 # Default OpenAI model
 DEFAULT_OPENAI_MODEL = "gpt-4o-mini"
+# Evaluate data file
+EVALUATE_DATA = "evaluate/data/data.json"

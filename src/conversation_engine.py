@@ -19,6 +19,7 @@ from src.global_settings import INDEX_STORAGE, CONVERSATION_FILE, SCORES_FILE, P
 from src.global_settings import DEFAULT_GEMINI_MODEL, DEFAULT_OPENAI_MODEL
 from src.prompts import (CUSTORM_AGENT_SYSTEM_TEMPLATE,
                          QA_PROMPT_TEMPLATE,
+                         TEXT_QA_TEMPLATE,
                          AGENT_WORKER_PROMPT_TEMPLATE_VI,
                          AGENT_WORKER_PROMPT_TEMPLATE_EN,
                          AGENT_WORKER_PROMPT_TEMPLATE_TEST
@@ -77,12 +78,12 @@ def display_messages(chat_store, container):
     """Displays chat messages from the chat store."""
     with container:
         for message in chat_store.get_messages(key=DEFAULT_CHAT_STORE_KEY):
-            avatar = "👤" if message.role == "user" else "🤖"
+            avatar = "🧑🏻" if message.role == "user" else "🧑🏻‍⚕️"
             if message.content:
                 with st.chat_message(message.role, avatar=avatar):
                     st.markdown(message.content)
 
-def initialize_chatbot(chat_store, container):
+def initialize_chatbot(chat_store=None, container=None, system_prompt=CUSTORM_AGENT_SYSTEM_TEMPLATE, evaluate=False):
     """Initializes the chatbot agent."""
     # Memory
     memory = ChatMemoryBuffer.from_defaults(
@@ -99,7 +100,7 @@ def initialize_chatbot(chat_store, container):
     mental_health_query_engine = index.as_query_engine(similarity_top_k=3,
                                                     #    llm=query_llm
                                                        )
-    mental_health_query_engine.update_prompts({"response_synthesizer:text_qa_template": PromptTemplate(QA_PROMPT_TEMPLATE)})
+    mental_health_query_engine.update_prompts({"response_synthesizer:text_qa_template": PromptTemplate(TEXT_QA_TEMPLATE)})
 
     mental_health_tool = QueryEngineTool(
         query_engine=mental_health_query_engine,
@@ -122,21 +123,22 @@ def initialize_chatbot(chat_store, container):
     #     # llm=gemini_agent_llm,
     #     memory=memory,
     #     verbose=True,
-    #     # context=CUSTORM_AGENT_SYSTEM_TEMPLATE
+    #     # context=system_prompt
     # )
 
     agent = OpenAIAgent.from_tools(
-        tools=[mental_health_tool, save_score_tool],
+        tools=[mental_health_tool, save_score_tool] if not evaluate else [mental_health_tool],
         # llm=openai_agent_llm,
         memory=memory,
-        system_prompt=CUSTORM_AGENT_SYSTEM_TEMPLATE,
+        system_prompt=system_prompt,
         verbose=True
     )
  
     # agent.update_prompts({"agent_worker:system_prompt": PromptTemplate(AGENT_WORKER_PROMPT_TEMPLATE_EN)})
 
     # Display chat messages
-    display_messages(chat_store, container)
+    if not evaluate:
+        display_messages(chat_store, container)
     return agent
 
 def stream_data(response):
@@ -149,16 +151,16 @@ def chat_inference(agent, chat_store, container):
     # Display welcome message
     if not os.path.exists(CONVERSATION_FILE) or os.path.getsize(CONVERSATION_FILE) == 0:
         with container:
-            with st.chat_message(name="assistant", avatar="🤖"):
+            with st.chat_message(name="assistant", avatar="🧑🏻‍⚕️"):
                 st.markdown("Chào bạn! Mình là chuyên gia tâm lý AI, mình sẽ giúp bạn theo dõi và tư vấn về sức khỏe tâm thần theo từng ngày. Hãy nói chuyện với mình như một người bạn để tạo cảm giác thoải mái nhất nhé!")
 
     # Get user input
     prompt = st.chat_input("Nhập tin nhắn của bạn...")
     if prompt:
         with container:
-            with st.chat_message(name="user", avatar="👤"):
+            with st.chat_message(name="user", avatar="🧑🏻"):
                 st.markdown(prompt)
             response = agent.chat(prompt)
-            with st.chat_message(name="assistant", avatar="🤖"):
+            with st.chat_message(name="assistant", avatar="🧑🏻‍⚕️"):
                 st.write_stream(stream_data(response))
         chat_store.persist(CONVERSATION_FILE)
